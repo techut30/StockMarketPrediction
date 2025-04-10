@@ -1,0 +1,46 @@
+import os
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error
+import pennylane as qml
+import pennylane.numpy as pnp
+import joblib
+from datetime import timedelta
+
+processed_data_path = "data/processed/processed_data.csv"
+models_path = "models/quantum"
+reports_path = "reports/quantum_ml"
+os.makedirs(models_path, exist_ok=True)
+os.makedirs(reports_path, exist_ok=True)
+
+df = pd.read_csv(processed_data_path, index_col=0, parse_dates=True)
+
+features = ['MA_10', 'MA_50', 'RSI', 'MACD', 'Signal_Line']
+target = 'close'
+
+df['MA_20'] = df['close'].rolling(window=20).mean()
+df['Volatility'] = df['close'].rolling(window=20).std()
+df['Momentum'] = df['close'] - df['close'].shift(4)
+df['Bollinger_Upper'] = df['MA_20'] + 2 * df['Volatility']
+df['Bollinger_Lower'] = df['MA_20'] - 2 * df['Volatility']
+features.extend(['MA_20', 'Volatility', 'Momentum', 'Bollinger_Upper', 'Bollinger_Lower'])
+
+for lag in range(1, 5):
+    df[f'lag_{lag}'] = df['close'].shift(lag)
+features.extend([f'lag_{lag}' for lag in range(1, 5)])
+
+df = df.dropna()
+
+X = df[features].values.astype(np.float64)
+y = df[target].values.astype(np.float64)
+
+X_min = X.min(axis=0)
+X_max = X.max(axis=0)
+X_norm = 2 * (X - X_min) / (X_max - X_min) - 1
+
+y_mean = y.mean()
+y_std = y.std()
+y_norm = (y - y_mean) / y_std
+
+X_train, X_test, y_train, y
