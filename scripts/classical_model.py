@@ -7,10 +7,11 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, m
 import joblib
 from datetime import timedelta
 
-processed_data_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/data/processed/processed_data.csv"
-splits_data_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/data/splits"
-models_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/models/classical"
-reports_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/reports/classical_ml"
+# Replace with relative or environment-specific paths
+processed_data_path = "data/processed/processed_data.csv"
+splits_data_path = "data/splits"
+models_path = "models/classical"
+reports_path = "reports/classical_ml"
 
 os.makedirs(models_path, exist_ok=True)
 os.makedirs(reports_path, exist_ok=True)
