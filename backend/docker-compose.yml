@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quantum_backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+  frontend:
+    image: nginx:alpine
+    container_name: quantum_frontend
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
