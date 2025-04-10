@@ -2,7 +2,9 @@ import os
 import requests
 import pandas as pd
 
-API_KEY = "9MIRNF77SRB2DVN3"
+# Replace with your actual API key
+API_KEY = "YOUR_API_KEY"
+# Replace with your desired base URL if different
 BASE_URL = "https://www.alphavantage.co/query"
 
 # List of 50 major stock symbols
@@ -55,6 +57,8 @@ def ingest_stock_data(symbol, output_path, function="TIME_SERIES_DAILY", outputs
         print(f"Data retrieval failed for {symbol}.")
 
 if __name__ == '__main__':
+    # Replace the base directory path with a generic or relative path
+    base_directory = "data/raw"
     for symbol in symbols:
-        output_path = f"/Users/uttakarsh/Desktop/StockMarketPrediction/data/raw/{symbol}_daily.csv"
+        output_path = os.path.join(base_directory, f"{symbol}_daily.csv")
         ingest_stock_data(symbol, output_path)
