@@ -2,16 +2,17 @@ import os
 import pandas as pd
 import numpy as onp
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
 import pennylane as qml
 import pennylane.numpy as pnp
 import joblib
 from datetime import timedelta
 
-processed_data_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/data/processed/processed_data.csv"
-splits_data_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/data/splits"
-models_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/models/quantum"
-reports_path = "/Users/uttakarsh/Desktop/StockMarketPrediction/reports/quantum_ml"
+# Replace with relative paths or environment-specific paths
+processed_data_path = "data/processed/processed_data.csv"
+splits_data_path = "data/splits"
+models_path = "models/quantum"
+reports_path = "reports/quantum_ml"
 os.makedirs(models_path, exist_ok=True)
 os.makedirs(reports_path, exist_ok=True)
 
@@ -44,7 +45,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y_norm, test_size=0.2, sh
 
 # Quantum circuit parameters
 n_qubits = 10
-n_layers = 2
+n_layers = 4
 dev = qml.device("default.qubit", wires=n_qubits)
 
 def pad_input(x, n):
@@ -93,19 +94,16 @@ y_pred_norm = onp.array([quantum_model(x, weights) for x in X_test])
 y_pred = y_pred_norm * y_std + y_mean
 y_test_denorm = y_test * y_std + y_mean
 rmse = onp.sqrt(mean_squared_error(y_test_denorm, y_pred))
-r2 = r2_score(y_test_denorm, y_pred)
 mae = mean_absolute_error(y_test_denorm, y_pred)
 mape = mean_absolute_percentage_error(y_test_denorm, y_pred)
 accuracy = 100 - (mape * 100)
 print(f"RMSE: {rmse}")
-print(f"R²: {r2}")
 print(f"MAE: {mae}")
 print(f"MAPE: {mape}")
 print(f"Accuracy: {accuracy:.2f}%")
 metrics_file = os.path.join(reports_path, "quantum_model_metrics.txt")
 with open(metrics_file, "w") as f:
     f.write(f"RMSE: {rmse}\n")
-    f.write(f"R²: {r2}\n")
     f.write(f"MAE: {mae}\n")
     f.write(f"MAPE: {mape}\n")
     f.write(f"Accuracy: {accuracy:.2f}%\n")
@@ -116,13 +114,13 @@ all_pred = onp.array([quantum_model(x, weights) for x in X])
 df['Predicted_Close'] = all_pred * y_std + y_mean
 df['Return_Percentage'] = (df['Predicted_Close'] - df['close']) / df['close'] * 100
 
-def recommend_stocks(df, top_n=5):
+def recommend_stocks(df, top_n=3):
     df_recommend = df.groupby('Symbol').agg({'Return_Percentage': 'mean', 'close': 'last'}).reset_index()
     df_recommend = df_recommend.sort_values(by='Return_Percentage', ascending=False)
     return df_recommend.head(top_n)
 
 top_stocks = recommend_stocks(df)
-print("\nTop 5 Stocks to Invest In:")
+print("\nTop 3 Stocks to Invest In:")
 print(top_stocks)
 recommendations_file = os.path.join(reports_path, "stock_recommendations.csv")
 top_stocks.to_csv(recommendations_file, index=False)
@@ -153,5 +151,3 @@ for symbol in top_stocks['Symbol']:
     print(f"Buy Today at: ${df[df['Symbol'] == symbol]['close'].iloc[-1]:.2f}")
     print(f"Sell on: {sell_date.strftime('%Y-%m-%d')} at: ${sell_price:.2f}")
     print(f"Expected Profit: ${profit:.2f}")
-
-
